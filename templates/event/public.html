@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ event.name }}{% endblock %}
+{% block content %}
+
+<h3>
+    {{ event.name }}
+</h3>
+<p class="text-muted">
+    Hosted by
+    <a href="{{ url_for('user_page.profile', id=event.host) }}">{{ host.name }}</a>
+    {% if session.email == host.email %}
+    <a href="{{ url_for('event_page.edit', id=event.id) }}">Edit</a>
+    {% endif %}
+</p>
+
+<div class="row">
+    <div class="col-md-8">
+        {% if event.event_photo %}
+        <img width="100%" src="{{ event.event_photo }}">
+        {% else %}
+        <img width="100%" src="{{ url_for('static', filename='img/event.png') }}">
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <h6>
+            Start Time
+        </h6>
+        <p>
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+            {{ event.start_datetime.strftime("%Y-%m-%d %I:%M%p") }}
+        </p>
+        <h6>
+            End Time
+        </h6>
+        <p>
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+            {{ event.end_datetime.strftime("%Y-%m-%d %I:%M%p") }}
+        </p>
+        <h6>
+            Place
+        </h6>
+        <p>
+            <i class="fa fa-map-marker" aria-hidden="true"></i>
+            <a href="http://maps.google.com?q={{ event.place }}" target="_blank">
+            {{ event.place }}
+            </a>
+        </p>
+        
+        {% if event.cancel %}
+        This event has been canceled.
+        {% elif session['email'] == host.email %}
+        {% elif user in event.attendees %}
+        <a href="{{ url_for('event_page.leave', id=event.id) }}" class="btn btn-danger">Leave</a>
+        {% else %}
+        <a href="{{ url_for('event_page.join', id=event.id) }}" class="btn btn-success">Join</a>
+        {% endif %}
+    </div>
+</div>
+
+<hr>
+<h3>
+    Description
+</h3>
+<div class="row">
+    <div class="col-md-12">
+        <p>
+            {{ event.description}}
+        </p>
+    </div>
+</div>
+
+<hr>
+<h3>
+    Attendees
+</h3>
+<div class="row">
+    {% for user in event.attendees %}
+    <div class="col-md-3 text-center">
+        <a href="{{ url_for('user_page.profile', id=user.id) }}">
+        {% if user.profile_image %}
+            <img width="150px" height="150px" src="{{ user.profile_image }}"
+                 class="img-thumbnail rounded-circle">
+        {% else %}
+            <img width="150px" height="150px" src="{{ url_for('static', filename='img/user.png')}}"
+                 class="img-thumbnail rounded-circle">
+        {% endif %}
+            <p>
+                {{ user.name }}
+            </p>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
