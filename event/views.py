@@ -99,3 +99,58 @@ def public(id):
         return render_template('event/public.html', event=event, host=host, user=user)
     else:
         abort(404)
+@event_page.route('/<id>/join', methods=['GET'])
+@login_required
+def join(id):
+    user = User.objects.filter(email=session.get('email')).first()
+    try:
+        event = Event.objects.filter(id=bson.ObjectId(id)).first()
+    except bson.errors.InvalidId:
+        abort(404)    
+    
+    if user and event:
+        if user not in event.attendees:
+            event.attendees.append(user)
+            event.save()
+        return redirect(url_for('event_page.public', id=id))
+    else:
+        abort(404)
+
+@event_page.route('/<id>/leave', methods=['GET'])
+@login_required
+def leave(id):
+    user = User.objects.filter(email=session.get('email')).first()
+    try:
+        event = Event.objects.filter(id=bson.ObjectId(id)).first()
+    except bson.errors.InvalidId:
+        abort(404)   
+    
+    if user and event:
+        if user in event.attendees:
+            event.attendees.remove(user)
+            event.save()
+        return redirect(url_for('event_page.public', id=id))
+    else:
+        abort(404)
+@event_page.route('/manage/<int:event_page_number>', methods=['GET'])
+@event_page.route('/manage', methods=['GET'])
+@login_required
+def manage(event_page_number=1):
+    user = User.objects.filter(email=session.get('email')).first()
+    if user:
+        events = Event.objects.filter(host=user.id).order_by('-start_datetime').paginate(page=event_page_number, per_page=4)
+        return render_template('event/manage.html', events=events)
+    else:
+        abort(404)
+@event_page.route('/explore/<int:event_page_number>', methods=['GET'])
+@event_page.route('/explore', methods=['GET'])
+def explore(event_page_number=1):
+    place = request.args.get('place')
+    try:
+        lng = float(request.args.get('lng'))
+        lat = float(request.args.get('lat'))
+        events = Event.objects(location__near=[lng, lat], location__max_distance=10000,
+                               cancel=False).order_by('-start_datetime').paginate(page=event_page_number, per_page=4)
+        return render_template('event/explore.html', events=events, place=place, lng=lng, lat=lat)
+    except:
+        return render_template('event/explore.html', place=place)

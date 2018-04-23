@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
 
   <!-- Custom styles for this template -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <style>
     .container {
       padding-top: 100px;
@@ -38,6 +39,9 @@
           <li class="nav-item{%if request.endpoint == 'event_page.create'%} active {% endif%}">
           <a class="nav-link" href="{{url_for('event_page.create')}}">Create a Event</a>
         </li>
+          <li class="nav-item{%if request.endpoint == 'event_page.explore'%} active {% endif%}">
+          <a class="nav-link" href="{{url_for('event_page.explore')}}">Explore a Event</a>
+        </li>
       {% if session.email %}
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ session.email }}
@@ -46,7 +50,8 @@
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="{{ url_for('user_page.edit')}}">Edit Profile</a>
           <a class="dropdown-item" href="{{url_for('user_page.password')}}">Change Password</a>
-        </div>
+            <a class="dropdown-item" href="{{ url_for('event_page.manage')}}">My Events</a>        
+          </div>
       </li>
           <li class = "nav-item">
              <a class = "nav-link" href = "{{ url_for('user_page.logout') }}">Log Out</a>

@@ -1,33 +1,37 @@
 {% extends "base.html" %}
-{% block title %}{{ user.name }}'s Profile{% endblock %}
+{% block title %}Explore{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-        <div class="text-center">
-            {% if user.profile_image %}
-            <img width="150px" height="150px" src="{{ user.profile_image }}" class="img-thumbnail rounded-circle">
-            {% else %}
-            <img width="150px" height="150px" src="{{ url_for('static', filename='img/user.png') }}" class="img-thrumbnail rounded-circle">
-            {% endif %}
-            <h3>
-                {{ user.name }}
-            </h3>
-            
-            <p>
-                {% if user.bio %}
-                {{ user.bio }}
-                {% else %}
-                Hello everyone, I am a newbie here!
-                {% endif %}
-            </p>
-        </div>
-    </div>   
-</div>
 
+<div class="jumbotron text-center">
+    <div class="container">
+        <h1 class="jumbotron-heading">
+            Find an Event
+        </h1>
+        <p class="lead text-muted">
+            If you want to go fast, go alone, If you want to go far, go together.
+        </p>
+        
+        <form method="GET" action="{{ url_for('event_page.explore') }}">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search for place..."
+                       id="autocomplete">
+                <input type="hidden" name="place" id="place">
+                <input type="hidden" name='lng' id="lng">
+                <input type="hidden" name="lat" id="lat">
+                <span class="input-group-btn">
+                    <button class="btn btn-secondary" type="submit">
+                        Go!
+                    </button>
+                </span>
+            </div>
+        </form>
+    </div>
+    
+</div>
 
 {% if events and events.pages > 0 %}
 <p class="text-muted text-center">
-    Event I'm going :)
+    Event near {{ place }}
 </p>
 
 
@@ -71,8 +75,8 @@
     <ul class="pagination">
         {% if events.has_prev %}
         <li class="page-item">
-            <a class="page-link" href="{{ url_for('user_page.profile',
-                                       event_page_number=events.prev_num, id=user.id) }}">
+            <a class="page-link" href="{{ url_for('event_page.explore',
+                                       event_page_number=events.prev_num, place=place, lng=lng, lat=lat) }}">
                 <span>&laquo;</span>
             </a>
         </li>
@@ -84,13 +88,22 @@
         </li>
         {% if events.has_next %}
         <li class="page-item">
-            <a class="page-link" href="{{ url_for('user_page.profile', 
-                                       event_page_number=events.next_num, id=user.id) }}">
+            <a class="page-link" href="{{ url_for('event_page.explore', 
+                                       event_page_number=events.next_num, place=place, lng=lng, lat=lat) }}">
                 <span>&raquo;</span>
             </a>
         </li>
         {% endif %}
     </ul>
 </div>
+{% elif place %}
+<p class="text-muted text-center">
+    We couldn't find any events here :(
+</p>
+{% else %}
 {% endif %}
+
+{% endblock %}
+{% block javascript %}
+{% include "googleapi.html" %}
 {% endblock %}

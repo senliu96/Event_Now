@@ -1,47 +1,20 @@
 {% extends "base.html" %}
-{% block title %}{{ user.name }}'s Profile{% endblock %}
+{% block title %}Manange Event{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-        <div class="text-center">
-            {% if user.profile_image %}
-            <img width="150px" height="150px" src="{{ user.profile_image }}" class="img-thumbnail rounded-circle">
-            {% else %}
-            <img width="150px" height="150px" src="{{ url_for('static', filename='img/user.png') }}" class="img-thrumbnail rounded-circle">
-            {% endif %}
-            <h3>
-                {{ user.name }}
-            </h3>
-            
-            <p>
-                {% if user.bio %}
-                {{ user.bio }}
-                {% else %}
-                Hello everyone, I am a newbie here!
-                {% endif %}
-            </p>
-        </div>
-    </div>   
-</div>
 
-
-{% if events and events.pages > 0 %}
-<p class="text-muted text-center">
-    Event I'm going :)
-</p>
-
+<h1>
+    My Events
+</h1>
 
 <div class="row">
     {% for event in events.items %}
     <div class="col-md-6 event-item">
         <div class="card">
-            <a href="{{ url_for('event_page.public', id=event.id) }}" target="_blank">
             {% if event.event_photo %}
             <img class="card-img-top event-photo-item" src="{{ event.event_photo}}">
             {% else %}
             <img class="card-img-top event-photo-item" src="{{ url_for('static', filename='img/event.png')}}">
             {% endif %}
-            </a>
             <div class="card-block">
                 <h4 class="card-title">
                     {{ event.name }}
@@ -61,6 +34,15 @@
                     <i class="fa fa-users" aria-hidden="true"></i>
                     {{ event.attendees|length }} attending
                 </p>
+                {% if event.cancel %}
+                <button class="btn btn-danger">
+                    Canceled
+                </button>
+                {% else %}
+                <a href="{{ url_for('event_page.edit', id=event.id) }}" class="btn btn-success">
+                    Edit
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -71,8 +53,8 @@
     <ul class="pagination">
         {% if events.has_prev %}
         <li class="page-item">
-            <a class="page-link" href="{{ url_for('user_page.profile',
-                                       event_page_number=events.prev_num, id=user.id) }}">
+            <a class="page-link" href="{{ url_for('event_page.manage',
+                                       event_page_number=events.prev_num) }}">
                 <span>&laquo;</span>
             </a>
         </li>
@@ -84,13 +66,12 @@
         </li>
         {% if events.has_next %}
         <li class="page-item">
-            <a class="page-link" href="{{ url_for('user_page.profile', 
-                                       event_page_number=events.next_num, id=user.id) }}">
+            <a class="page-link" href="{{ url_for('event_page.manage', 
+                                       event_page_number=events.next_num) }}">
                 <span>&raquo;</span>
             </a>
         </li>
         {% endif %}
     </ul>
 </div>
-{% endif %}
 {% endblock %}

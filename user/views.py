@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for,abort
 import bcrypt
+from event.models import Event
 from user.models import User
 from user.forms import RegistrationForm, LoginForm, EditProfileForm, PasswordForm
 from user.decorators import login_required
@@ -21,7 +22,7 @@ def login():
             if bcrypt.checkpw(form.password.data, user.password):
             #if form.password.data == user.password:
                 session['email'] = user.email
-                return redirect(request.args.get('next') or url_for('hello'))
+                return redirect(request.args.get('next') or url_for('home'))
             else:
                 user = None
         if not user:
@@ -49,7 +50,7 @@ def signup():
             password=hashed_password
         )
         user.save()
-        return '{} Signed up!'.format(form.name.data)
+        return redirect(url_for('user_page.login'))
     return render_template('user/signup.html', form=form)
 @user_page.route('/edit',methods = ['GET','POST'])
 @login_required
@@ -96,13 +97,15 @@ def password():
         return render_template('user/password.html', form=form, error=error, message=message)
     else:
         abort(404)
+@user_page.route('/<id>/<int:event_page_number>', methods=['GET'])
 @user_page.route('/<id>')
-def profile(id):
+def profile(id, event_page_number=1):
     try:
         user = User.objects.filter(id=bson.ObjectId(id)).first()
     except bson.errors.InvalidId:
         abort(404)
     if user:
-        return render_template('user/profile.html', user=user)
+        events = Event.objects(attendees__in=[user], cancel=False).order_by('-start_datetime').paginate(page=event_page_number, per_page=4)
+        return render_template('user/profile.html', user=user, events=events)
     else:
         abort(404)
